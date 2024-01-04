@@ -2,9 +2,9 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
-
 // Parse request of content-type: application/json
 app.use(bodyParser.json());
+
 
 // Define a simple rout
 app.get('/', (req, res) => {
@@ -40,6 +40,40 @@ app.get('/users/:ID',(req, res) => {
     }
     
 })
+
+
+// Update a user by specfic id
+app.put('/users/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const userUpdate = req.body;
+    const userIndex = users.findIndex((u) => u.id == id);
+
+    if (userIndex!==-1) {
+        let user = users[userIndex];
+        user = { ...user, ...userUpdate};
+        res.json(user);
+    }
+    else {
+        res.status(404).json({message: "User not found"});
+    }
+    
+})
+
+// Delete a specific user
+app.delete('/users/:id',(req, res) => {
+    const id = parseInt(req.params.id);
+    const userIndex = users.findIndex((u) => u.id == id);
+
+    if (userIndex!==-1) {
+        users.splice(userIndex, 1);
+        res.json(users);
+    }
+    else {
+        res.status(404).json({message: "User not found"});
+    }
+
+})
+
 
 // Start the server
 const port = 3000;
