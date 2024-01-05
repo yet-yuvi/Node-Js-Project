@@ -48,13 +48,11 @@ app.put('/users/:id', (req, res) => {
     const userUpdate = req.body;
     const userIndex = users.findIndex((u) => u.id == id);
 
-    if (userIndex!==-1) {
-        let user = users[userIndex];
-        user = { ...user, ...userUpdate};
-        res.json(user);
-    }
-    else {
-        res.status(404).json({message: "User not found"});
+    if (userIndex !== -1) {
+        users[userIndex] = { ...users[userIndex], ...userUpdate, id: id};
+        res.json(users[userIndex]);
+    } else {
+        res.status(404).json({ message: 'User not found' });
     }
     
 })
