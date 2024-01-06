@@ -44,16 +44,55 @@ app.get('/users/:ID',(req, res) => {
 
 // Update a user by specfic id
 app.put('/users/:id', (req, res) => {
+
     const id = parseInt(req.params.id);
     const userUpdate = req.body;
-    const userIndex = users.findIndex((u) => u.id == id);
 
-    if (userIndex !== -1) {
-        users[userIndex] = { ...users[userIndex], ...userUpdate, id: id};
-        res.json(users[userIndex]);
-    } else {
-        res.status(404).json({ message: 'User not found' });
+    let users2 =[];
+    let updatedUser;
+
+    users.forEach((u) => {
+        if(u.id===id) {
+            updatedUser ={ ...u, ...userUpdate};
+            users2.push(updatedUser);
+        }
+        else {
+            users2.push(u); 
+        }    
+    })
+
+    users = users2;
+
+    if(updatedUser) {
+        res.json(updatedUser);
     }
+    else {
+        res.status(404).json({massage: "User not found"});
+    }
+
+
+
+
+    //const userIndex = users.findIndex((u) => u.id == id);
+    // if (userIndex!==-1) {
+    //     let user = users[userIndex];
+    //     user = { ...user, ...userUpdate};
+    //     res.json(user);
+    // }
+    // else {
+    //     res.status(404).json({message: "User not found"});
+    // }
+
+    
+    
+
+    
+    // if (userIndex !== -1) {
+    //     users[userIndex] = { ...users[userIndex], ...userUpdate, id: id};
+    //     res.json(users);
+    // } else {
+    //     res.status(404).json({ message: 'User not found' });
+    // }
     
 })
 
