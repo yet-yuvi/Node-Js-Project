@@ -59,3 +59,28 @@ Commands:
  npm i express --save
  npm i nodemon --save-dev
  npm i body-parser --save
+ npm i mongoose --save
+ npm i dotenv --save
+
+ Git command:
+ git clone "romete link"
+ git status
+ git add .
+ git commit -m"Commit-1 : Massage"
+ git push
+ git log --all
+ git log --all --graph
+ git branch
+ git branch branchName
+ git switch branchName
+ git fetch
+ git merge origin/main
+
+.gitignore:
+node_modules/
+.env
+
+Connect with mongoDB:
+    1. Create an account in mongodb atlas
+    2. Create a project
+    3. Create Cluster/DataBase
