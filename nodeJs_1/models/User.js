@@ -1,10 +1,10 @@
-const mongoose = require('mongose');
+const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-    fName: {
+    fname: {
         type: String
     },
-    lName: {
+    lname: {
         type: String
     }
 })
