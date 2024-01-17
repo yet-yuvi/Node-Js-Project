@@ -1,17 +1,77 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../../models/User');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Create a user
 router.post('/', async(req, res) => {
     console.log('Request Body:', req.body);
-    const userObject = {
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(req.body.password, salt);
+
+        const userObject = {
         fname: req.body.fName,
-        lname: req.body.lName
+        lname: req.body.lName,
+        email: req.body.email,
+        password: hash
+        }
+        const user = new User(userObject);
+        await user.save();
+        res.status(201).json(user);
     }
-    const user = new User(userObject);
-    await user.save();
-    res.status(201).json(user);
+    catch (error) {
+        console.error(error);
+        res.status(500).json({message: "Something went wrong"});
+    }
+    
+})
+
+// Log in a user
+router.post('/login', async(req, res) => {
+    try {
+        const {type, email, password} = req.body; //check
+        if(type== 'email') {
+            //Step 1: Find the user by email
+            const user = await User.findOne({email: email});
+            if(!user) {
+                res.status(401).json({massage: "User not found"})
+            }
+            else {
+                // Step 2: If user found match password
+                const isValidPassword = await bcrypt.compare(password, user.password);  //check
+                if(!isValidPassword) {
+                    res.status(401).json({massage: "Password is wrong"});
+                }
+                else {
+                    // Step 3: If password match then token generate
+                    const accessToken = jwt.sign(
+                       { email: user.email, id: user._id },  //check
+                       process.env.JWT_SECRET,
+                       { expiresIn: "7d" }
+                    );
+
+                    const refreshToken = jwt.sign(
+                        { email: user.email, id: user._id },  //check
+                        process.env.JWT_SECRET,
+                        { expiresIn: "30d" }
+                     );
+                    
+                     const userObj = user.toJSON();
+                     userObj['accessToken'] = accessToken;  //check
+                     userObj['refreshToken'] = refreshToken;
+                     res.status(200).json(userObj);
+                }
+            }
+        }
+        else {
+
+        }
+    }
+    catch (error) {
+        res.status(500).json({message: "Something went wrong"});
+    }
 })
 
 // Get all users
@@ -82,6 +142,16 @@ router.delete('/:id', async(req, res) => {
     }
 })
 
+
+// Delete all users
+router.delete('/', async (req, res) => {
+    try {
+        await User.deleteMany({});
+        res.json({ message: "All users have been deleted" });
+    } catch (error) {
+        res.status(500).json({ message: "Something went wrong" });
+    }
+});
 
 
 module.exports = router;

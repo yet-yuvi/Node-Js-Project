@@ -61,6 +61,8 @@ Commands:
  npm i body-parser --save
  npm i mongoose --save
  npm i dotenv --save
+ npm i jsonwebtoken --save
+ npm i bcrypt --save
 
  Git command:
  git clone "romete link"
