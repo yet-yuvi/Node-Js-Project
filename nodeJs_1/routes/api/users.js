@@ -4,9 +4,10 @@ const User = require('../../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const authenticateToken = require('../../middleware/auth');
+const fs = require('fs');
 
 
-let lastId = 0
+let lastId = readLastIdFromFile() || 0;
 // Create a user
 router.post('/', async(req, res) => {
     console.log('Request Body:', req.body);
@@ -25,6 +26,9 @@ router.post('/', async(req, res) => {
         const user = new User(userObject);
         await user.save();
         res.status(201).json(user);
+
+        // Update the last used ID in the file
+        updateLastIdInFile(lastId);
     }
     catch (error) {
         console.error(error);
@@ -103,7 +107,8 @@ router.put('/:id', async(req, res) => {
         const id = req.params.id;
         const userBody = {
             fname: req.body.fName,
-            lname: req.body.lName
+            lname: req.body.lName,
+            email: req.body.email
         }
         const newUser = await User.findByIdAndUpdate(id, userBody, {new: true});
         
@@ -142,6 +147,11 @@ router.delete('/:id', async(req, res) => {
 router.delete('/', async (req, res) => {
     try {
         await User.deleteMany({});
+
+        // Reset the lastId to 0 after deleting all users
+        lastId = 0;
+        updateLastIdInFile(lastId);
+
         res.json({ message: "All users have been deleted" });
     } catch (error) {
         res.status(500).json({ message: "Something went wrong" });
@@ -151,6 +161,19 @@ router.delete('/', async (req, res) => {
 
 module.exports = router;
 
+
+function readLastIdFromFile() {
+    try {
+        const data = fs.readFileSync('./ID/lastId.txt', 'utf8');
+        return parseInt(data);
+    } catch (err) {
+        return null;
+    }
+}
+
+function updateLastIdInFile(newId) {
+    fs.writeFileSync('./ID/lastId.txt', newId.toString(), 'utf8');
+}
 
 
 function refreshTokenLogin(refreshToken, res) {
@@ -175,7 +198,7 @@ function refreshTokenLogin(refreshToken, res) {
     }
 }
 
-async function refreshTokenLogin(email, res, password) {
+async function emailLogin(email, res, password) {
     const user = await User.findOne({ email: email });
     if (!user) {
         res.status(401).json({ massage: "User not found" });
